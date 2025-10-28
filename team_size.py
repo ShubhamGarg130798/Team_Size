@@ -126,13 +126,17 @@ loan_amt_t2 = loan_amt_t2_cr * 10000000
 
 # Team Performance Parameters
 st.sidebar.subheader("👥 Team Performance Targets")
+
+# Set default sales target based on work type
+default_sales_target = 150000.0 if work_type == "PHP" else 250000.0
+
 sanction_sales_target = st.sidebar.number_input(
     "Sales Target Per Day Per Person",
     min_value=0.0,
-    value=250000.0,
+    value=default_sales_target,
     step=10000.0,
     format="%.0f",
-    help="Daily target per sales person"
+    help="Daily target per sales person (Auto-set: PHP=150K, NON-PHP=250K)"
 )
 
 collection_target = st.sidebar.number_input(
