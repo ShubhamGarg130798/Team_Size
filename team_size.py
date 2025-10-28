@@ -233,7 +233,7 @@ with col1:
     st.subheader("Collection Components")
     
     collection_breakdown = pd.DataFrame({
-        'Period': ['Current Month (10%)', 'T-1 Month (75%)', 'T-2 Month (15%)'],
+        'Period': ['Current Month (11%)', 'T-1 Month (78%)', 'T-2 Month (11%)'],
         'Disbursement': [
             f"₹{loan_amt_current/100000:.2f}L",
             f"₹{loan_amt_t1/100000:.2f}L",
