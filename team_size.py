@@ -111,12 +111,12 @@ loan_amt_t2 = st.sidebar.number_input(
 # Team Performance Parameters
 st.sidebar.subheader("👥 Team Performance Targets")
 sanction_sales_target = st.sidebar.number_input(
-    "Sanction & Sales Target Per Day Per Person",
+    "Sales Target Per Day Per Person",
     min_value=1.0,
     value=250000.0,
     step=10000.0,
     format="%.0f",
-    help="Daily target per sanction/sales person"
+    help="Daily target per sales person"
 )
 
 collection_target = st.sidebar.number_input(
@@ -190,7 +190,7 @@ with col4:
     st.metric(
         label="👥 Total Staff Required",
         value=f"{int(no_sanction_sales) + (1 if no_sanction_sales % 1 > 0 else 0) + int(no_collection) + (1 if no_collection % 1 > 0 else 0)}",
-        help="Total Sanction/Sales + Collection staff"
+        help="Total Sales + Collection staff"
     )
 
 # Staff breakdown
@@ -199,7 +199,7 @@ st.header("👥 Staff Requirement Breakdown")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("Sanction & Sales Team")
+    st.subheader("Sales Team")
     st.info(f"""
     **Calculation:**
     - Daily Target: ₹{loan_amt_current/no_of_days:,.0f}
@@ -250,7 +250,7 @@ st.success(f"**Total Collection Required:** ₹{total_collection_required/100000
 st.header("📋 Complete Summary Report")
 
 team_rounded = {
-    'Sanction & Sales': int(no_sanction_sales) + (1 if no_sanction_sales % 1 > 0 else 0),
+    'Sales': int(no_sanction_sales) + (1 if no_sanction_sales % 1 > 0 else 0),
     'Collection': int(no_collection) + (1 if no_collection % 1 > 0 else 0)
 }
 
@@ -300,7 +300,7 @@ summary_data = {
         f"₹{total_collection_required:,.0f}",
         '',
         f"{no_sanction_sales:.2f}",
-        f"{team_rounded['Sanction & Sales']}",
+        f"{team_rounded['Sales']}",
         f"{no_collection:.2f}",
         f"{team_rounded['Collection']}",
         f"{sum(team_rounded.values())}"
@@ -338,7 +338,7 @@ INPUT PARAMETERS:
 - ROI per Day: {roi_per_day}%
 - Average Ticket Size: ₹{avg_ticket_size:,.0f}
 - Average Tenure: {avg_tenure} days
-- Sanction Target/Day/Person: ₹{sanction_sales_target:,.0f}
+- Sales Target/Day/Person: ₹{sanction_sales_target:,.0f}
 - Collection Target/Month/Person: ₹{collection_target:,.0f}
 
 CALCULATED RESULTS:
