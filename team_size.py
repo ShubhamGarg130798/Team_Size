@@ -128,6 +128,26 @@ collection_target = st.sidebar.number_input(
     help="Monthly collection target per person"
 )
 
+# Credit Team Parameters
+st.sidebar.subheader("🔍 Credit Team Parameters")
+conversion_rate = st.sidebar.number_input(
+    "Conversion Rate by Credit Team (%)",
+    min_value=0.1,
+    max_value=100.0,
+    value=80.0,
+    step=1.0,
+    help="Percentage of loans that get approved by credit team"
+)
+
+credit_efficiency = st.sidebar.number_input(
+    "Efficiency of Credit Person Per Day",
+    min_value=1.0,
+    value=10.0,
+    step=1.0,
+    format="%.0f",
+    help="Number of loans a credit person can check per day"
+)
+
 # Calculations
 st.header("📋 Key Calculations")
 
@@ -149,16 +169,20 @@ interest_current = loan_amt_current * (roi_per_day / 100) * avg_tenure
 interest_t1 = loan_amt_t1 * (roi_per_day / 100) * avg_tenure
 interest_t2 = loan_amt_t2 * (roi_per_day / 100) * avg_tenure
 
-# Collection components (Principal + Interest) - UPDATED PERCENTAGES
-collection_current = (loan_amt_current + interest_current) * 0.11  # Changed from 0.10 to 0.11
-collection_t1 = (loan_amt_t1 + interest_t1) * 0.78  # Changed from 0.75 to 0.78
-collection_t2 = (loan_amt_t2 + interest_t2) * 0.11  # Changed from 0.10 to 0.11
+# Collection components (Principal + Interest)
+collection_current = (loan_amt_current + interest_current) * 0.11
+collection_t1 = (loan_amt_t1 + interest_t1) * 0.78
+collection_t2 = (loan_amt_t2 + interest_t2) * 0.11
 
 # Total collection required
 total_collection_required = collection_current + collection_t1 + collection_t2
 
 # Number of Collection Person Required
 no_collection = total_collection_required / collection_target
+
+# 6. Credit Team calculations
+loans_to_be_checked = no_of_loans * (100 / conversion_rate)
+no_credit = (loans_to_be_checked / credit_efficiency) / no_of_days
 
 # Display results in columns
 col1, col2, col3, col4 = st.columns(4)
@@ -189,14 +213,14 @@ with col3:
 with col4:
     st.metric(
         label="👥 Total Staff Required",
-        value=f"{int(no_sanction_sales) + (1 if no_sanction_sales % 1 > 0 else 0) + int(no_collection) + (1 if no_collection % 1 > 0 else 0)}",
-        help="Total Sales + Collection staff"
+        value=f"{int(no_sanction_sales) + (1 if no_sanction_sales % 1 > 0 else 0) + int(no_credit) + (1 if no_credit % 1 > 0 else 0) + int(no_collection) + (1 if no_collection % 1 > 0 else 0)}",
+        help="Total Sales + Credit + Collection staff"
     )
 
 # Staff breakdown
 st.header("👥 Staff Requirement Breakdown")
 
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     st.subheader("Sales Team")
@@ -209,6 +233,16 @@ with col1:
     """)
 
 with col2:
+    st.subheader("Credit Team")
+    st.info(f"""
+    **Calculation:**
+    - Loans to Check: {loans_to_be_checked:.2f}
+    - Credit Efficiency/Day: {credit_efficiency:.0f}
+    - **Exact Staff Needed:** {no_credit:.2f}
+    - **Rounded Up:** {int(no_credit) + (1 if no_credit % 1 > 0 else 0)} persons
+    """)
+
+with col3:
     st.subheader("Collection Team")
     st.info(f"""
     **Calculation:**
@@ -251,6 +285,7 @@ st.header("📋 Complete Summary Report")
 
 team_rounded = {
     'Sales': int(no_sanction_sales) + (1 if no_sanction_sales % 1 > 0 else 0),
+    'Credit': int(no_credit) + (1 if no_credit % 1 > 0 else 0),
     'Collection': int(no_collection) + (1 if no_collection % 1 > 0 else 0)
 }
 
@@ -276,6 +311,9 @@ summary_data = {
         '',
         'Sanction & Sales Staff (Exact)',
         'Sanction & Sales Staff (Rounded)',
+        'Loans to be Checked by Credit',
+        'Credit Staff (Exact)',
+        'Credit Staff (Rounded)',
         'Collection Staff (Exact)',
         'Collection Staff (Rounded)',
         'Total Staff Required'
@@ -301,6 +339,9 @@ summary_data = {
         '',
         f"{no_sanction_sales:.2f}",
         f"{team_rounded['Sales']}",
+        f"{loans_to_be_checked:.2f}",
+        f"{no_credit:.2f}",
+        f"{team_rounded['Credit']}",
         f"{no_collection:.2f}",
         f"{team_rounded['Collection']}",
         f"{sum(team_rounded.values())}"
@@ -340,12 +381,16 @@ INPUT PARAMETERS:
 - Average Tenure: {avg_tenure} days
 - Sales Target/Day/Person: ₹{sanction_sales_target:,.0f}
 - Collection Target/Month/Person: ₹{collection_target:,.0f}
+- Conversion Rate by Credit: {conversion_rate}%
+- Credit Efficiency/Day: {credit_efficiency:.0f}
 
 CALCULATED RESULTS:
 - Amount in Bank: ₹{amt_in_bank:,.0f}
 - Repayment Amount: ₹{repayment_amt:,.0f}
 - Number of Loans: {int(no_of_loans)}
+- Loans to be Checked: {loans_to_be_checked:.2f}
 - Sales Staff: {team_rounded['Sales']}
+- Credit Staff: {team_rounded['Credit']}
 - Collection Staff: {team_rounded['Collection']}
 - Total Staff Required: {sum(team_rounded.values())}
 
