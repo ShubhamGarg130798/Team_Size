@@ -36,14 +36,15 @@ st.sidebar.header("⚙️ Input Parameters")
 
 # Financial Parameters
 st.sidebar.subheader("💰 Loan Disbursement Details")
-loan_amt_current = st.sidebar.number_input(
-    "Loan Amount to be Disbursed (Current Month)",
+loan_amt_current_cr = st.sidebar.number_input(
+    "Loan Amount to be Disbursed (Current Month) (in Crores)",
     min_value=0.0,
-    value=10000000.0,
-    step=100000.0,
-    format="%.0f",
-    help="Enter amount in absolute value (e.g., 10000000 for 1 CR)"
+    value=1.0,
+    step=0.1,
+    format="%.2f",
+    help="Enter amount in Crores (e.g., 1.0 for 1 CR)"
 )
+loan_amt_current = loan_amt_current_cr * 10000000
 
 pf_percentage = st.sidebar.number_input(
     "Processing Fee (PF) %",
@@ -90,23 +91,25 @@ no_of_days = st.sidebar.number_input(
 
 # Historical Data
 st.sidebar.subheader("📈 Historical Disbursement Data")
-loan_amt_t1 = st.sidebar.number_input(
-    "Loan Amount Disbursed (T-1 Month)",
+loan_amt_t1_cr = st.sidebar.number_input(
+    "Loan Amount Disbursed (T-1 Month) (in Crores)",
     min_value=0.0,
-    value=8000000.0,
-    step=100000.0,
-    format="%.0f",
-    help="Loan amount disbursed in previous month"
+    value=0.8,
+    step=0.1,
+    format="%.2f",
+    help="Loan amount disbursed in previous month (in Crores)"
 )
+loan_amt_t1 = loan_amt_t1_cr * 10000000
 
-loan_amt_t2 = st.sidebar.number_input(
-    "Loan Amount Disbursed (T-2 Month)",
+loan_amt_t2_cr = st.sidebar.number_input(
+    "Loan Amount Disbursed (T-2 Month) (in Crores)",
     min_value=0.0,
-    value=5000000.0,
-    step=100000.0,
-    format="%.0f",
-    help="Loan amount disbursed two months ago"
+    value=0.5,
+    step=0.1,
+    format="%.2f",
+    help="Loan amount disbursed two months ago (in Crores)"
 )
+loan_amt_t2 = loan_amt_t2_cr * 10000000
 
 # Team Performance Parameters
 st.sidebar.subheader("👥 Team Performance Targets")
