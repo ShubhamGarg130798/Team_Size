@@ -1,11 +1,21 @@
 import streamlit as st
 import pandas as pd
+import subprocess
+import sys
+
+# Auto-install plotly if not available
 try:
     import plotly.graph_objects as go
     import plotly.express as px
     PLOTLY_AVAILABLE = True
 except ImportError:
-    PLOTLY_AVAILABLE = False
+    st.info("Installing plotly... Please wait.")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "plotly"])
+    import plotly.graph_objects as go
+    import plotly.express as px
+    PLOTLY_AVAILABLE = True
+    st.success("Plotly installed successfully! Reloading...")
+    st.rerun()
 
 # Page configuration
 st.set_page_config(
@@ -258,29 +268,21 @@ with col1:
 with col2:
     st.subheader("Collection Distribution")
     
-    if PLOTLY_AVAILABLE:
-        pie_data = pd.DataFrame({
-            'Period': ['Current (10%)', 'T-1 (75%)', 'T-2 (15%)'],
-            'Amount': [collection_current, collection_t1, collection_t2]
-        })
-        
-        fig_pie = px.pie(
-            pie_data,
-            values='Amount',
-            names='Period',
-            title='Collection Split by Period',
-            color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1'],
-            hole=0.4
-        )
-        fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-        st.plotly_chart(fig_pie, use_container_width=True)
-    else:
-        st.warning("Install plotly for visualizations: pip install plotly")
-        pie_data = pd.DataFrame({
-            'Period': ['Current (10%)', 'T-1 (75%)', 'T-2 (15%)'],
-            'Amount': [f"₹{collection_current/100000:.2f}L", f"₹{collection_t1/100000:.2f}L", f"₹{collection_t2/100000:.2f}L"]
-        })
-        st.dataframe(pie_data, use_container_width=True, hide_index=True)
+    pie_data = pd.DataFrame({
+        'Period': ['Current (10%)', 'T-1 (75%)', 'T-2 (15%)'],
+        'Amount': [collection_current, collection_t1, collection_t2]
+    })
+    
+    fig_pie = px.pie(
+        pie_data,
+        values='Amount',
+        names='Period',
+        title='Collection Split by Period',
+        color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1'],
+        hole=0.4
+    )
+    fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+    st.plotly_chart(fig_pie, use_container_width=True)
 
 # Team composition visualization
 st.header("📊 Team Composition Visualization")
@@ -290,33 +292,26 @@ team_rounded = {
     'Collection': int(no_collection) + (1 if no_collection % 1 > 0 else 0)
 }
 
-if PLOTLY_AVAILABLE:
-    fig_team = go.Figure(data=[
-        go.Bar(
-            name='Required Staff',
-            x=list(team_rounded.keys()),
-            y=list(team_rounded.values()),
-            text=list(team_rounded.values()),
-            textposition='outside',
-            marker_color=['#636EFA', '#EF553B']
-        )
-    ])
-
-    fig_team.update_layout(
-        title='Team Requirement by Role',
-        xaxis_title='Role',
-        yaxis_title='Number of Staff',
-        showlegend=False,
-        height=400
+fig_team = go.Figure(data=[
+    go.Bar(
+        name='Required Staff',
+        x=list(team_rounded.keys()),
+        y=list(team_rounded.values()),
+        text=list(team_rounded.values()),
+        textposition='outside',
+        marker_color=['#636EFA', '#EF553B']
     )
+])
 
-    st.plotly_chart(fig_team, use_container_width=True)
-else:
-    team_df = pd.DataFrame({
-        'Role': list(team_rounded.keys()),
-        'Required Staff': list(team_rounded.values())
-    })
-    st.bar_chart(team_df.set_index('Role'))
+fig_team.update_layout(
+    title='Team Requirement by Role',
+    xaxis_title='Role',
+    yaxis_title='Number of Staff',
+    showlegend=False,
+    height=400
+)
+
+st.plotly_chart(fig_team, use_container_width=True)
 
 # Complete summary table
 st.header("📋 Complete Summary Report")
