@@ -435,7 +435,7 @@ COLLECTION BREAKDOWN:
 st.markdown("---")
 st.markdown("""
     <div style='text-align: center; color: #666;'>
-     #   <p><strong>Team Requirement Analyzer</strong> | Built with Streamlit</p>
-     #   <p>Designed for efficient loan disbursement and collection team planning</p>
+        <p><strong>Team Requirement Analyzer</strong> | Built with Streamlit</p>
+        <p>Designed for efficient loan disbursement and collection team planning</p>
     </div>
 """, unsafe_allow_html=True)
