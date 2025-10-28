@@ -155,10 +155,10 @@ interest_current = loan_amt_current * (roi_per_day / 100) * avg_tenure
 interest_t1 = loan_amt_t1 * (roi_per_day / 100) * avg_tenure
 interest_t2 = loan_amt_t2 * (roi_per_day / 100) * avg_tenure
 
-# Collection components
-collection_current = interest_current * 0.10
-collection_t1 = interest_t1 * 0.75
-collection_t2 = interest_t2 * 0.15
+# Collection components (Principal + Interest)
+collection_current = (loan_amt_current + interest_current) * 0.10
+collection_t1 = (loan_amt_t1 + interest_t1) * 0.75
+collection_t2 = (loan_amt_t2 + interest_t2) * 0.15
 
 # Total collection required
 total_collection_required = collection_current + collection_t1 + collection_t2
