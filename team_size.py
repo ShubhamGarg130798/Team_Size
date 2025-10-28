@@ -49,91 +49,24 @@ if work_type == "PHP":
 
 # Financial Parameters
 st.sidebar.subheader("💰 Loan Disbursement Details")
+loan_amt_current_cr = st.sidebar.number_input(
+    "Loan Amount to be Disbursed (Current Month) (in Crores)",
+    min_value=0.0,
+    value=20.0,
+    step=0.1,
+    format="%.2f",
+    help="Enter amount in Crores (e.g., 1.0 for 1 CR)"
+)
+loan_amt_current = loan_amt_current_cr * 10000000
 
-# Initialize session state for synchronized inputs
-if 'loan_amt_value' not in st.session_state:
-    st.session_state.loan_amt_value = 20.0
-if 'amt_bank_value' not in st.session_state:
-    st.session_state.amt_bank_value = 17.64
-if 'pf_percentage' not in st.session_state:
-    st.session_state.pf_percentage = 11.8
-if 'pf_just_changed' not in st.session_state:
-    st.session_state.pf_just_changed = False
-
-# Processing Fee input (needed for calculations)
 pf_percentage = st.sidebar.number_input(
     "Processing Fee (PF) %",
     min_value=0.0,
     max_value=100.0,
-    value=st.session_state.pf_percentage,
+    value=11.8,
     step=0.1,
-    key="pf_input",
     help="Processing fee as percentage of loan amount"
 )
-
-# If PF percentage changed, recalculate amount in bank and trigger rerun
-if abs(pf_percentage - st.session_state.pf_percentage) > 0.001:
-    st.session_state.pf_percentage = pf_percentage
-    loan_amt_current = st.session_state.loan_amt_value * 10000000
-    amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
-    st.session_state.amt_bank_value = amt_in_bank / 10000000
-    st.session_state.pf_just_changed = True
-    st.rerun()
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("**💡 Control either input - the other updates automatically:**")
-
-# Loan Amount to be Disbursed input
-loan_amt_current_cr = st.sidebar.number_input(
-    "Loan Amount to be Disbursed (Current Month) (in Crores)",
-    min_value=0.0,
-    value=st.session_state.loan_amt_value,
-    step=0.1,
-    format="%.2f",
-    key="loan_amt_input",
-    help="Gross loan amount to be disbursed (before PF deduction)"
-)
-
-# Amount in Bank input
-amt_in_bank_cr = st.sidebar.number_input(
-    "Amount in Bank (in Crores)",
-    min_value=0.0,
-    value=st.session_state.amt_bank_value,
-    step=0.1,
-    format="%.2f",
-    key="amt_bank_input",
-    help="Net amount available in bank after processing fee deduction"
-)
-
-# Reset the flag after displaying inputs
-if st.session_state.pf_just_changed:
-    st.session_state.pf_just_changed = False
-
-# Check if loan amount changed (and it wasn't just a PF change)
-if abs(loan_amt_current_cr - st.session_state.loan_amt_value) > 0.001 and not st.session_state.pf_just_changed:
-    st.session_state.loan_amt_value = loan_amt_current_cr
-    # Calculate amount in bank from loan amount
-    loan_amt_current = loan_amt_current_cr * 10000000
-    amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
-    st.session_state.amt_bank_value = amt_in_bank / 10000000
-    st.rerun()
-
-# Check if amount in bank changed (and it wasn't just a PF change)
-if abs(amt_in_bank_cr - st.session_state.amt_bank_value) > 0.001 and not st.session_state.pf_just_changed:
-    st.session_state.amt_bank_value = amt_in_bank_cr
-    # Calculate loan amount from amount in bank
-    amt_in_bank = amt_in_bank_cr * 10000000
-    if pf_percentage < 100:  # Avoid division by zero
-        loan_amt_current = amt_in_bank / (1 - pf_percentage/100)
-        st.session_state.loan_amt_value = loan_amt_current / 10000000
-    st.rerun()
-
-# Use the current values for calculations
-loan_amt_current = st.session_state.loan_amt_value * 10000000
-amt_in_bank = st.session_state.amt_bank_value * 10000000
-pf_amount = loan_amt_current - amt_in_bank
-
-st.sidebar.markdown("---")
 
 roi_per_day = st.sidebar.number_input(
     "ROI per Day (%)",
@@ -239,6 +172,10 @@ else:
 # Calculations
 st.header("📋 Key Calculations")
 
+# 1. Amount to be present in bank
+pf_amount = (pf_percentage / 100) * loan_amt_current
+amt_in_bank = loan_amt_current - pf_amount
+
 # 2. Repayment Amount
 repayment_amt = loan_amt_current + (loan_amt_current * (roi_per_day / 100) * avg_tenure)
 
@@ -277,11 +214,10 @@ col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     st.metric(
-        label="💰 Loan Amount to be Disbursed",
-        value=f"₹{loan_amt_current/10000000:.2f} Cr",
-        delta=f"PF: ₹{pf_amount/100000:.2f}L ({pf_percentage}%)",
-        delta_color="inverse",
-        help=f"Gross loan amount to be disbursed (before PF deduction)"
+        label="💵 Amount in Bank",
+        value=f"₹{amt_in_bank/100000:.2f}L",
+        delta=f"-₹{pf_amount/100000:.2f}L (PF)",
+        help=f"Net amount after deducting {pf_percentage}% processing fee"
     )
 
 with col2:
@@ -388,9 +324,9 @@ team_rounded = {
 summary_data = {
     'Parameter': [
         'Work Type',
-        'Amount in Bank',
-        'Processing Fee Amount',
         'Loan Amount to Disburse (Current)',
+        'Processing Fee Amount',
+        'Amount Required in Bank',
         'Number of Loans',
         'Average Ticket Size',
         'Interest Amount (Current)',
@@ -417,9 +353,9 @@ summary_data = {
     ],
     'Value': [
         work_type,
-        f"₹{amt_in_bank:,.0f}",
-        f"₹{pf_amount:,.0f}",
         f"₹{loan_amt_current:,.0f}",
+        f"₹{pf_amount:,.0f}",
+        f"₹{amt_in_bank:,.0f}",
         f"{int(no_of_loans)}",
         f"₹{avg_ticket_size:,.0f}",
         f"₹{interest_current:,.0f}",
@@ -437,8 +373,8 @@ summary_data = {
         '',
         f"{no_sanction_sales:.2f}",
         f"{team_rounded['Sales']}",
-        (f"{loans_to_be_checked:.2f}" if work_type == "NON-PHP" else "N/A (PHP)"),
-        (f"{no_credit:.2f}" if work_type == "NON-PHP" else "0 (PHP)"),
+        f"{loans_to_be_checked:.2f}" if work_type == "NON-PHP" else "N/A (PHP)",
+        f"{no_credit:.2f}" if work_type == "NON-PHP" else "0 (PHP)",
         f"{team_rounded['Credit']}",
         f"{no_collection:.2f}",
         f"{team_rounded['Collection']}",
@@ -466,10 +402,6 @@ with col1:
 
 with col2:
     # Create detailed report
-    loans_checked_text = f"{loans_to_be_checked:.2f}" if work_type == 'NON-PHP' else 'N/A (PHP)'
-    credit_note = ' (PHP - No Credit Team)' if work_type == 'PHP' else ''
-    conversion_note = ' (Not applicable - PHP)' if work_type == 'PHP' else ''
-    
     detailed_report = f"""
 TEAM REQUIREMENT ANALYSIS REPORT
 ================================
@@ -478,25 +410,23 @@ Generated on: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}
 WORK TYPE: {work_type}
 
 INPUT PARAMETERS:
-- Amount in Bank: ₹{amt_in_bank:,.0f}
-- Processing Fee: {pf_percentage}%
 - Loan Amount (Current): ₹{loan_amt_current:,.0f}
+- Processing Fee: {pf_percentage}%
 - ROI per Day: {roi_per_day}%
 - Average Ticket Size: ₹{avg_ticket_size:,.0f}
 - Average Tenure: {avg_tenure} days
 - Sales Target/Day/Person: ₹{sanction_sales_target:,.0f}
 - Collection Target/Month/Person: ₹{collection_target:,.0f}
-- Conversion Rate by Credit: {conversion_rate}%{conversion_note}
-- Credit Efficiency/Day: {credit_efficiency:.0f}{conversion_note}
+- Conversion Rate by Credit: {conversion_rate}% {'(Not applicable - PHP)' if work_type == 'PHP' else ''}
+- Credit Efficiency/Day: {credit_efficiency:.0f} {'(Not applicable - PHP)' if work_type == 'PHP' else ''}
 
 CALCULATED RESULTS:
-- Loan Amount to Disburse: ₹{loan_amt_current:,.0f}
-- Processing Fee Amount: ₹{pf_amount:,.0f}
+- Amount in Bank: ₹{amt_in_bank:,.0f}
 - Repayment Amount: ₹{repayment_amt:,.0f}
 - Number of Loans: {int(no_of_loans)}
-- Loans to be Checked: {loans_checked_text}
+- Loans to be Checked: {loans_to_be_checked:.2f if work_type == 'NON-PHP' else 'N/A (PHP)'}
 - Sales Staff: {team_rounded['Sales']}
-- Credit Staff: {team_rounded['Credit']}{credit_note}
+- Credit Staff: {team_rounded['Credit']} {'(PHP - No Credit Team)' if work_type == 'PHP' else ''}
 - Collection Staff: {team_rounded['Collection']}
 - Total Staff Required: {sum(team_rounded.values())}
 
