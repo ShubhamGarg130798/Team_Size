@@ -65,7 +65,7 @@ roi_per_day = st.sidebar.number_input(
 
 avg_ticket_size = st.sidebar.number_input(
     "Average Ticket Size",
-    min_value=1.0,
+    min_value=0.0,
     value=30000.0,
     step=1000.0,
     format="%.0f",
@@ -74,7 +74,7 @@ avg_ticket_size = st.sidebar.number_input(
 
 avg_tenure = st.sidebar.number_input(
     "Average Tenure (days)",
-    min_value=1,
+    min_value=0,
     value=25,
     step=1,
     help="Average loan tenure in days"
@@ -82,7 +82,7 @@ avg_tenure = st.sidebar.number_input(
 
 no_of_days = st.sidebar.number_input(
     "No of Days in Month",
-    min_value=1,
+    min_value=0,
     max_value=31,
     value=30,
     step=1
@@ -112,7 +112,7 @@ loan_amt_t2 = st.sidebar.number_input(
 st.sidebar.subheader("👥 Team Performance Targets")
 sanction_sales_target = st.sidebar.number_input(
     "Sales Target Per Day Per Person",
-    min_value=1.0,
+    min_value=0.0,
     value=250000.0,
     step=10000.0,
     format="%.0f",
@@ -121,7 +121,7 @@ sanction_sales_target = st.sidebar.number_input(
 
 collection_target = st.sidebar.number_input(
     "Collection Per Month Per Person",
-    min_value=1.0,
+    min_value=0.0,
     value=8000000.0,
     step=100000.0,
     format="%.0f",
@@ -132,7 +132,7 @@ collection_target = st.sidebar.number_input(
 st.sidebar.subheader("🔍 Credit Team Parameters")
 conversion_rate = st.sidebar.number_input(
     "Conversion Rate by Credit Team (%)",
-    min_value=0.1,
+    min_value=0.0,
     max_value=100.0,
     value=80.0,
     step=1.0,
@@ -141,7 +141,7 @@ conversion_rate = st.sidebar.number_input(
 
 credit_efficiency = st.sidebar.number_input(
     "Efficiency of Credit Person Per Day",
-    min_value=1.0,
+    min_value=0.0,
     value=10.0,
     step=1.0,
     format="%.0f",
