@@ -456,6 +456,10 @@ with col1:
 
 with col2:
     # Create detailed report
+    loans_checked_text = f"{loans_to_be_checked:.2f}" if work_type == 'NON-PHP' else 'N/A (PHP)'
+    credit_note = ' (PHP - No Credit Team)' if work_type == 'PHP' else ''
+    conversion_note = ' (Not applicable - PHP)' if work_type == 'PHP' else ''
+    
     detailed_report = f"""
 TEAM REQUIREMENT ANALYSIS REPORT
 ================================
@@ -472,17 +476,17 @@ INPUT PARAMETERS:
 - Average Tenure: {avg_tenure} days
 - Sales Target/Day/Person: ₹{sanction_sales_target:,.0f}
 - Collection Target/Month/Person: ₹{collection_target:,.0f}
-- Conversion Rate by Credit: {conversion_rate}% {'(Not applicable - PHP)' if work_type == 'PHP' else ''}
-- Credit Efficiency/Day: {credit_efficiency:.0f} {'(Not applicable - PHP)' if work_type == 'PHP' else ''}
+- Conversion Rate by Credit: {conversion_rate}%{conversion_note}
+- Credit Efficiency/Day: {credit_efficiency:.0f}{conversion_note}
 
 CALCULATED RESULTS:
 - Loan Amount to Disburse: ₹{loan_amt_current:,.0f}
 - Processing Fee Amount: ₹{pf_amount:,.0f}
 - Repayment Amount: ₹{repayment_amt:,.0f}
 - Number of Loans: {int(no_of_loans)}
-- Loans to be Checked: {loans_to_be_checked:.2f if work_type == 'NON-PHP' else 'N/A (PHP)'}
+- Loans to be Checked: {loans_checked_text}
 - Sales Staff: {team_rounded['Sales']}
-- Credit Staff: {team_rounded['Credit']} {'(PHP - No Credit Team)' if work_type == 'PHP' else ''}
+- Credit Staff: {team_rounded['Credit']}{credit_note}
 - Collection Staff: {team_rounded['Collection']}
 - Total Staff Required: {sum(team_rounded.values())}
 
