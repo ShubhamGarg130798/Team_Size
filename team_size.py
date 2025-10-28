@@ -345,7 +345,7 @@ CALCULATED RESULTS:
 - Amount in Bank: ₹{amt_in_bank:,.0f}
 - Repayment Amount: ₹{repayment_amt:,.0f}
 - Number of Loans: {int(no_of_loans)}
-- Sanction & Sales Staff: {team_rounded['Sanction & Sales']}
+- Sales Staff: {team_rounded['Sales']}
 - Collection Staff: {team_rounded['Collection']}
 - Total Staff Required: {sum(team_rounded.values())}
 
