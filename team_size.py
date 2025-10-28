@@ -127,6 +127,17 @@ loan_amt_t2 = loan_amt_t2_cr * 10000000
 # Team Performance Parameters
 st.sidebar.subheader("👥 Team Performance Targets")
 
+# Initialize session state for work type tracking
+if 'previous_work_type' not in st.session_state:
+    st.session_state.previous_work_type = work_type
+
+# Check if work type changed
+if st.session_state.previous_work_type != work_type:
+    st.session_state.previous_work_type = work_type
+    # Clear the sales target from session state to force reset
+    if 'sales_target' in st.session_state:
+        del st.session_state['sales_target']
+
 # Set default sales target based on work type
 default_sales_target = 150000.0 if work_type == "PHP" else 250000.0
 
@@ -137,7 +148,7 @@ sanction_sales_target = st.sidebar.number_input(
     step=10000.0,
     format="%.0f",
     help="Daily target per sales person (Auto-set: PHP=₹1.5L, NON-PHP=₹2.5L)",
-    key=f"sales_target_{work_type}"
+    key="sales_target"
 )
 
 collection_target = st.sidebar.number_input(
