@@ -39,7 +39,7 @@ st.sidebar.subheader("💰 Loan Disbursement Details")
 loan_amt_current_cr = st.sidebar.number_input(
     "Loan Amount to be Disbursed (Current Month) (in Crores)",
     min_value=0.0,
-    value=1.0,
+    value=20.0,
     step=0.1,
     format="%.2f",
     help="Enter amount in Crores (e.g., 1.0 for 1 CR)"
@@ -94,7 +94,7 @@ st.sidebar.subheader("📈 Historical Disbursement Data")
 loan_amt_t1_cr = st.sidebar.number_input(
     "Loan Amount Disbursed (T-1 Month) (in Crores)",
     min_value=0.0,
-    value=0.8,
+    value=12.0,
     step=0.1,
     format="%.2f",
     help="Loan amount disbursed in previous month (in Crores)"
@@ -104,7 +104,7 @@ loan_amt_t1 = loan_amt_t1_cr * 10000000
 loan_amt_t2_cr = st.sidebar.number_input(
     "Loan Amount Disbursed (T-2 Month) (in Crores)",
     min_value=0.0,
-    value=0.5,
+    value=9.0,
     step=0.1,
     format="%.2f",
     help="Loan amount disbursed two months ago (in Crores)"
