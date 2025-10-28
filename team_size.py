@@ -130,6 +130,12 @@ st.sidebar.subheader("👥 Team Performance Targets")
 # Set default sales target based on work type
 default_sales_target = 150000.0 if work_type == "PHP" else 250000.0
 
+# Show info about auto-setting
+if work_type == "PHP":
+    st.sidebar.info(f"💡 Sales target auto-set to ₹{default_sales_target:,.0f} for PHP")
+else:
+    st.sidebar.info(f"💡 Sales target auto-set to ₹{default_sales_target:,.0f} for NON-PHP")
+
 # Use dynamic key that includes work_type - this forces widget to reset when work_type changes
 sanction_sales_target = st.sidebar.number_input(
     "Sales Target Per Day Per Person",
