@@ -50,17 +50,15 @@ if work_type == "PHP":
 # Financial Parameters
 st.sidebar.subheader("💰 Loan Disbursement Details")
 
-# Amount in Bank as input parameter
-amt_in_bank_cr = st.sidebar.number_input(
-    "Amount in Bank (in Crores)",
-    min_value=0.0,
-    value=17.64,
-    step=0.1,
-    format="%.2f",
-    help="Net amount available in bank after processing fee deduction"
-)
-amt_in_bank = amt_in_bank_cr * 10000000
+# Initialize session state for synchronized inputs
+if 'last_changed' not in st.session_state:
+    st.session_state.last_changed = 'loan_amt'
+if 'loan_amt_value' not in st.session_state:
+    st.session_state.loan_amt_value = 20.0
+if 'amt_bank_value' not in st.session_state:
+    st.session_state.amt_bank_value = 17.64
 
+# Processing Fee input (needed for calculations)
 pf_percentage = st.sidebar.number_input(
     "Processing Fee (PF) %",
     min_value=0.0,
@@ -70,12 +68,53 @@ pf_percentage = st.sidebar.number_input(
     help="Processing fee as percentage of loan amount"
 )
 
-# Calculate loan amount from amount in bank
-# Formula: amt_in_bank = loan_amt_current - (pf_percentage/100 * loan_amt_current)
-# amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
-# loan_amt_current = amt_in_bank / (1 - pf_percentage/100)
-loan_amt_current = amt_in_bank / (1 - pf_percentage/100)
+st.sidebar.markdown("---")
+st.sidebar.markdown("**💡 Control either input - the other updates automatically:**")
+
+# Loan Amount to be Disbursed input
+loan_amt_current_cr = st.sidebar.number_input(
+    "Loan Amount to be Disbursed (Current Month) (in Crores)",
+    min_value=0.0,
+    value=st.session_state.loan_amt_value,
+    step=0.1,
+    format="%.2f",
+    key="loan_amt_input",
+    help="Gross loan amount to be disbursed (before PF deduction)"
+)
+
+# Amount in Bank input
+amt_in_bank_cr = st.sidebar.number_input(
+    "Amount in Bank (in Crores)",
+    min_value=0.0,
+    value=st.session_state.amt_bank_value,
+    step=0.1,
+    format="%.2f",
+    key="amt_bank_input",
+    help="Net amount available in bank after processing fee deduction"
+)
+
+# Detect which input changed and update the other
+if loan_amt_current_cr != st.session_state.loan_amt_value:
+    st.session_state.last_changed = 'loan_amt'
+    st.session_state.loan_amt_value = loan_amt_current_cr
+    # Calculate amount in bank from loan amount
+    loan_amt_current = loan_amt_current_cr * 10000000
+    amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
+    st.session_state.amt_bank_value = amt_in_bank / 10000000
+elif amt_in_bank_cr != st.session_state.amt_bank_value:
+    st.session_state.last_changed = 'amt_bank'
+    st.session_state.amt_bank_value = amt_in_bank_cr
+    # Calculate loan amount from amount in bank
+    amt_in_bank = amt_in_bank_cr * 10000000
+    loan_amt_current = amt_in_bank / (1 - pf_percentage/100)
+    st.session_state.loan_amt_value = loan_amt_current / 10000000
+
+# Use the current values for calculations
+loan_amt_current = st.session_state.loan_amt_value * 10000000
+amt_in_bank = st.session_state.amt_bank_value * 10000000
 pf_amount = loan_amt_current - amt_in_bank
+
+st.sidebar.markdown("---")
 
 roi_per_day = st.sidebar.number_input(
     "ROI per Day (%)",
