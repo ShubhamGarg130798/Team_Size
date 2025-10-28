@@ -127,28 +127,18 @@ loan_amt_t2 = loan_amt_t2_cr * 10000000
 # Team Performance Parameters
 st.sidebar.subheader("👥 Team Performance Targets")
 
-# Initialize or update sales target based on work type change
-if 'last_work_type' not in st.session_state:
-    st.session_state.last_work_type = work_type
+# Set default sales target based on work type
+default_sales_target = 150000.0 if work_type == "PHP" else 250000.0
 
-# Detect work type change and reset the sales target
-if st.session_state.last_work_type != work_type:
-    st.session_state.last_work_type = work_type
-    # Directly set the key that the number_input uses
-    st.session_state.sales_target_input = 150000.0 if work_type == "PHP" else 250000.0
-
-# Set default value for first load
-if 'sales_target_input' not in st.session_state:
-    st.session_state.sales_target_input = 150000.0 if work_type == "PHP" else 250000.0
-
+# Use dynamic key that includes work_type - this forces widget to reset when work_type changes
 sanction_sales_target = st.sidebar.number_input(
     "Sales Target Per Day Per Person",
     min_value=0.0,
-    value=st.session_state.sales_target_input,
+    value=default_sales_target,
     step=10000.0,
     format="%.0f",
     help="Daily target per sales person (Auto: PHP=150K, NON-PHP=250K)",
-    key="sales_target_input"
+    key=f"sales_target_{work_type}"  # Dynamic key changes with work_type
 )
 
 collection_target = st.sidebar.number_input(
