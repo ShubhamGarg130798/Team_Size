@@ -126,28 +126,14 @@ loan_amt_t2 = loan_amt_t2_cr * 10000000
 
 # Team Performance Parameters
 st.sidebar.subheader("👥 Team Performance Targets")
-
-# Set sales target based on work type - use conditional display
-if work_type == "PHP":
-    sanction_sales_target = st.sidebar.number_input(
-        "Sales Target Per Day Per Person",
-        min_value=0.0,
-        value=150000.0,
-        step=10000.0,
-        format="%.0f",
-        help="Daily target per sales person (PHP default: ₹1.5L)",
-        key="sales_target_php"
-    )
-else:  # NON-PHP
-    sanction_sales_target = st.sidebar.number_input(
-        "Sales Target Per Day Per Person",
-        min_value=0.0,
-        value=250000.0,
-        step=10000.0,
-        format="%.0f",
-        help="Daily target per sales person (NON-PHP default: ₹2.5L)",
-        key="sales_target_nonphp"
-    )
+sanction_sales_target = st.sidebar.number_input(
+    "Sales Target Per Day Per Person",
+    min_value=0.0,
+    value=250000.0,
+    step=10000.0,
+    format="%.0f",
+    help="Daily target per sales person"
+)
 
 collection_target = st.sidebar.number_input(
     "Collection Per Month Per Person",
@@ -335,10 +321,6 @@ team_rounded = {
     'Collection': int(no_collection) + (1 if no_collection % 1 > 0 else 0)
 }
 
-# Fixed: Properly handle the conditional formatting for loans_to_be_checked
-loans_checked_display = f"{loans_to_be_checked:.2f}" if work_type == "NON-PHP" else "N/A (PHP)"
-credit_exact_display = f"{no_credit:.2f}" if work_type == "NON-PHP" else "0 (PHP)"
-
 summary_data = {
     'Parameter': [
         'Work Type',
@@ -391,8 +373,8 @@ summary_data = {
         '',
         f"{no_sanction_sales:.2f}",
         f"{team_rounded['Sales']}",
-        loans_checked_display,
-        credit_exact_display,
+        f"{loans_to_be_checked:.2f}" if work_type == "NON-PHP" else "N/A (PHP)",
+        f"{no_credit:.2f}" if work_type == "NON-PHP" else "0 (PHP)",
         f"{team_rounded['Credit']}",
         f"{no_collection:.2f}",
         f"{team_rounded['Collection']}",
@@ -442,7 +424,7 @@ CALCULATED RESULTS:
 - Amount in Bank: ₹{amt_in_bank:,.0f}
 - Repayment Amount: ₹{repayment_amt:,.0f}
 - Number of Loans: {int(no_of_loans)}
-- Loans to be Checked: {loans_checked_display}
+- Loans to be Checked: {loans_to_be_checked:.2f if work_type == 'NON-PHP' else 'N/A (PHP)'}
 - Sales Staff: {team_rounded['Sales']}
 - Credit Staff: {team_rounded['Credit']} {'(PHP - No Credit Team)' if work_type == 'PHP' else ''}
 - Collection Staff: {team_rounded['Collection']}
