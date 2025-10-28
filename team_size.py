@@ -34,6 +34,19 @@ st.markdown('<p class="sub-header">Calculate staffing requirements based on loan
 # Sidebar for inputs
 st.sidebar.header("⚙️ Input Parameters")
 
+# PHP/NON-PHP Selection at the top
+st.sidebar.subheader("🔧 Working On")
+work_type = st.sidebar.radio(
+    "Select Work Type:",
+    options=["PHP", "NON-PHP"],
+    index=1,  # Default to NON-PHP
+    horizontal=True,
+    help="Select PHP to exclude Credit Team from calculations"
+)
+
+if work_type == "PHP":
+    st.sidebar.info("ℹ️ Credit Team count set to 0 for PHP")
+
 # Financial Parameters
 st.sidebar.subheader("💰 Loan Disbursement Details")
 loan_amt_current_cr = st.sidebar.number_input(
@@ -131,25 +144,30 @@ collection_target = st.sidebar.number_input(
     help="Monthly collection target per person"
 )
 
-# Credit Team Parameters
+# Credit Team Parameters (disabled if PHP is selected)
 st.sidebar.subheader("🔍 Credit Team Parameters")
-conversion_rate = st.sidebar.number_input(
-    "Conversion Rate by Credit Team (%)",
-    min_value=0.0,
-    max_value=100.0,
-    value=30.0,
-    step=1.0,
-    help="Percentage of loans that get approved by credit team"
-)
+if work_type == "NON-PHP":
+    conversion_rate = st.sidebar.number_input(
+        "Conversion Rate by Credit Team (%)",
+        min_value=0.0,
+        max_value=100.0,
+        value=30.0,
+        step=1.0,
+        help="Percentage of loans that get approved by credit team"
+    )
 
-credit_efficiency = st.sidebar.number_input(
-    "Efficiency of Credit Person Per Day",
-    min_value=0.0,
-    value=80.0,
-    step=1.0,
-    format="%.0f",
-    help="Number of loans a credit person can check per day"
-)
+    credit_efficiency = st.sidebar.number_input(
+        "Efficiency of Credit Person Per Day",
+        min_value=0.0,
+        value=80.0,
+        step=1.0,
+        format="%.0f",
+        help="Number of loans a credit person can check per day"
+    )
+else:
+    st.sidebar.info("Credit Team parameters disabled for PHP")
+    conversion_rate = 100.0  # Set to 100% to avoid division issues
+    credit_efficiency = 1.0
 
 # Calculations
 st.header("📋 Key Calculations")
@@ -184,8 +202,12 @@ total_collection_required = collection_current + collection_t1 + collection_t2
 no_collection = total_collection_required / collection_target
 
 # 6. Credit Team calculations
-loans_to_be_checked = no_of_loans * (100 / conversion_rate)
-no_credit = (loans_to_be_checked / credit_efficiency) / no_of_days
+if work_type == "NON-PHP":
+    loans_to_be_checked = no_of_loans * (100 / conversion_rate)
+    no_credit = (loans_to_be_checked / credit_efficiency) / no_of_days
+else:
+    loans_to_be_checked = 0
+    no_credit = 0
 
 # Display results in columns
 col1, col2, col3, col4 = st.columns(4)
@@ -237,13 +259,20 @@ with col1:
 
 with col2:
     st.subheader("Credit Team")
-    st.info(f"""
-    **Calculation:**
-    - Loans to Check: {loans_to_be_checked:.2f}
-    - Credit Efficiency/Day: {credit_efficiency:.0f}
-    - **Exact Staff Needed:** {no_credit:.2f}
-    - **Rounded Up:** {int(no_credit) + (1 if no_credit % 1 > 0 else 0)} persons
-    """)
+    if work_type == "NON-PHP":
+        st.info(f"""
+        **Calculation:**
+        - Loans to Check: {loans_to_be_checked:.2f}
+        - Credit Efficiency/Day: {credit_efficiency:.0f}
+        - **Exact Staff Needed:** {no_credit:.2f}
+        - **Rounded Up:** {int(no_credit) + (1 if no_credit % 1 > 0 else 0)} persons
+        """)
+    else:
+        st.warning(f"""
+        **PHP Mode Active**
+        - Credit Team: **0 persons**
+        - (Credit team not required for PHP)
+        """)
 
 with col3:
     st.subheader("Collection Team")
@@ -288,12 +317,13 @@ st.header("📋 Complete Summary Report")
 
 team_rounded = {
     'Sales': int(no_sanction_sales) + (1 if no_sanction_sales % 1 > 0 else 0),
-    'Credit': int(no_credit) + (1 if no_credit % 1 > 0 else 0),
+    'Credit': int(no_credit) + (1 if no_credit % 1 > 0 else 0) if work_type == "NON-PHP" else 0,
     'Collection': int(no_collection) + (1 if no_collection % 1 > 0 else 0)
 }
 
 summary_data = {
     'Parameter': [
+        'Work Type',
         'Loan Amount to Disburse (Current)',
         'Processing Fee Amount',
         'Amount Required in Bank',
@@ -322,6 +352,7 @@ summary_data = {
         'Total Staff Required'
     ],
     'Value': [
+        work_type,
         f"₹{loan_amt_current:,.0f}",
         f"₹{pf_amount:,.0f}",
         f"₹{amt_in_bank:,.0f}",
@@ -342,8 +373,8 @@ summary_data = {
         '',
         f"{no_sanction_sales:.2f}",
         f"{team_rounded['Sales']}",
-        f"{loans_to_be_checked:.2f}",
-        f"{no_credit:.2f}",
+        f"{loans_to_be_checked:.2f}" if work_type == "NON-PHP" else "N/A (PHP)",
+        f"{no_credit:.2f}" if work_type == "NON-PHP" else "0 (PHP)",
         f"{team_rounded['Credit']}",
         f"{no_collection:.2f}",
         f"{team_rounded['Collection']}",
@@ -376,6 +407,8 @@ TEAM REQUIREMENT ANALYSIS REPORT
 ================================
 Generated on: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}
 
+WORK TYPE: {work_type}
+
 INPUT PARAMETERS:
 - Loan Amount (Current): ₹{loan_amt_current:,.0f}
 - Processing Fee: {pf_percentage}%
@@ -384,16 +417,16 @@ INPUT PARAMETERS:
 - Average Tenure: {avg_tenure} days
 - Sales Target/Day/Person: ₹{sanction_sales_target:,.0f}
 - Collection Target/Month/Person: ₹{collection_target:,.0f}
-- Conversion Rate by Credit: {conversion_rate}%
-- Credit Efficiency/Day: {credit_efficiency:.0f}
+- Conversion Rate by Credit: {conversion_rate}% {'(Not applicable - PHP)' if work_type == 'PHP' else ''}
+- Credit Efficiency/Day: {credit_efficiency:.0f} {'(Not applicable - PHP)' if work_type == 'PHP' else ''}
 
 CALCULATED RESULTS:
 - Amount in Bank: ₹{amt_in_bank:,.0f}
 - Repayment Amount: ₹{repayment_amt:,.0f}
 - Number of Loans: {int(no_of_loans)}
-- Loans to be Checked: {loans_to_be_checked:.2f}
+- Loans to be Checked: {loans_to_be_checked:.2f if work_type == 'NON-PHP' else 'N/A (PHP)'}
 - Sales Staff: {team_rounded['Sales']}
-- Credit Staff: {team_rounded['Credit']}
+- Credit Staff: {team_rounded['Credit']} {'(PHP - No Credit Team)' if work_type == 'PHP' else ''}
 - Collection Staff: {team_rounded['Collection']}
 - Total Staff Required: {sum(team_rounded.values())}
 
