@@ -136,7 +136,8 @@ sanction_sales_target = st.sidebar.number_input(
     value=default_sales_target,
     step=10000.0,
     format="%.0f",
-    help="Daily target per sales person (Auto-set: PHP=₹1.5L, NON-PHP=₹2.5L)"
+    help="Daily target per sales person (Auto-set: PHP=₹1.5L, NON-PHP=₹2.5L)",
+    key=f"sales_target_{work_type}"
 )
 
 collection_target = st.sidebar.number_input(
