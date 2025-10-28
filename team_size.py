@@ -1,11 +1,5 @@
 import streamlit as st
 import pandas as pd
-try:
-    import plotly.graph_objects as go
-    import plotly.express as px
-    PLOTLY_AVAILABLE = True
-except ImportError:
-    PLOTLY_AVAILABLE = False
 
 # Page configuration
 st.set_page_config(
@@ -227,99 +221,38 @@ with col2:
 # Collection breakdown
 st.header("💰 Collection Requirement Analysis")
 
-col1, col2 = st.columns([1, 1])
+st.subheader("Collection Components")
 
-with col1:
-    st.subheader("Collection Components")
-    
-    collection_breakdown = pd.DataFrame({
-        'Period': ['Current Month (11%)', 'T-1 Month (78%)', 'T-2 Month (11%)'],
-        'Disbursement': [
-            f"₹{loan_amt_current/100000:.2f}L",
-            f"₹{loan_amt_t1/100000:.2f}L",
-            f"₹{loan_amt_t2/100000:.2f}L"
-        ],
-        'Interest': [
-            f"₹{interest_current/100000:.2f}L",
-            f"₹{interest_t1/100000:.2f}L",
-            f"₹{interest_t2/100000:.2f}L"
-        ],
-        'Collection': [
-            f"₹{collection_current/100000:.2f}L",
-            f"₹{collection_t1/100000:.2f}L",
-            f"₹{collection_t2/100000:.2f}L"
-        ],
-        'Percentage': ['11%', '78%', '11%']
-    })
-    
-    st.dataframe(collection_breakdown, use_container_width=True, hide_index=True)
-    st.success(f"**Total Collection Required:** ₹{total_collection_required/100000:.2f} Lakhs")
+collection_breakdown = pd.DataFrame({
+    'Period': ['Current Month (11%)', 'T-1 Month (78%)', 'T-2 Month (11%)'],
+    'Disbursement': [
+        f"₹{loan_amt_current/100000:.2f}L",
+        f"₹{loan_amt_t1/100000:.2f}L",
+        f"₹{loan_amt_t2/100000:.2f}L"
+    ],
+    'Interest': [
+        f"₹{interest_current/100000:.2f}L",
+        f"₹{interest_t1/100000:.2f}L",
+        f"₹{interest_t2/100000:.2f}L"
+    ],
+    'Collection': [
+        f"₹{collection_current/100000:.2f}L",
+        f"₹{collection_t1/100000:.2f}L",
+        f"₹{collection_t2/100000:.2f}L"
+    ],
+    'Percentage': ['11%', '78%', '11%']
+})
 
-with col2:
-    st.subheader("Collection Distribution")
-    
-    if PLOTLY_AVAILABLE:
-        pie_data = pd.DataFrame({
-            'Period': ['Current (11%)', 'T-1 (78%)', 'T-2 (11%)'],
-            'Amount': [collection_current, collection_t1, collection_t2]
-        })
-        
-        fig_pie = px.pie(
-            pie_data,
-            values='Amount',
-            names='Period',
-            title='Collection Split by Period',
-            color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1'],
-            hole=0.4
-        )
-        fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-        st.plotly_chart(fig_pie, use_container_width=True)
-    else:
-        st.warning("Install plotly for visualizations: pip install plotly")
-        pie_data = pd.DataFrame({
-            'Period': ['Current (11%)', 'T-1 (78%)', 'T-2 (11%)'],
-            'Amount': [f"₹{collection_current/100000:.2f}L", f"₹{collection_t1/100000:.2f}L", f"₹{collection_t2/100000:.2f}L"]
-        })
-        st.dataframe(pie_data, use_container_width=True, hide_index=True)
+st.dataframe(collection_breakdown, use_container_width=True, hide_index=True)
+st.success(f"**Total Collection Required:** ₹{total_collection_required/100000:.2f} Lakhs")
 
-# Team composition visualization
-st.header("📊 Team Composition Visualization")
+# Complete summary table
+st.header("📋 Complete Summary Report")
 
 team_rounded = {
     'Sanction & Sales': int(no_sanction_sales) + (1 if no_sanction_sales % 1 > 0 else 0),
     'Collection': int(no_collection) + (1 if no_collection % 1 > 0 else 0)
 }
-
-if PLOTLY_AVAILABLE:
-    fig_team = go.Figure(data=[
-        go.Bar(
-            name='Required Staff',
-            x=list(team_rounded.keys()),
-            y=list(team_rounded.values()),
-            text=list(team_rounded.values()),
-            textposition='outside',
-            marker_color=['#636EFA', '#EF553B']
-        )
-    ])
-
-    fig_team.update_layout(
-        title='Team Requirement by Role',
-        xaxis_title='Role',
-        yaxis_title='Number of Staff',
-        showlegend=False,
-        height=400
-    )
-
-    st.plotly_chart(fig_team, use_container_width=True)
-else:
-    team_df = pd.DataFrame({
-        'Role': list(team_rounded.keys()),
-        'Required Staff': list(team_rounded.values())
-    })
-    st.bar_chart(team_df.set_index('Role'))
-
-# Complete summary table
-st.header("📋 Complete Summary Report")
 
 summary_data = {
     'Parameter': [
