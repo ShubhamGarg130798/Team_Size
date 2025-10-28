@@ -155,10 +155,10 @@ interest_current = loan_amt_current * (roi_per_day / 100) * avg_tenure
 interest_t1 = loan_amt_t1 * (roi_per_day / 100) * avg_tenure
 interest_t2 = loan_amt_t2 * (roi_per_day / 100) * avg_tenure
 
-# Collection components (Principal + Interest)
-collection_current = (loan_amt_current + interest_current) * 0.10
-collection_t1 = (loan_amt_t1 + interest_t1) * 0.75
-collection_t2 = (loan_amt_t2 + interest_t2) * 0.10
+# Collection components (Principal + Interest) - UPDATED PERCENTAGES
+collection_current = (loan_amt_current + interest_current) * 0.11  # Changed from 0.10 to 0.11
+collection_t1 = (loan_amt_t1 + interest_t1) * 0.78  # Changed from 0.75 to 0.78
+collection_t2 = (loan_amt_t2 + interest_t2) * 0.11  # Changed from 0.10 to 0.11
 
 # Total collection required
 total_collection_required = collection_current + collection_t1 + collection_t2
@@ -233,7 +233,7 @@ with col1:
     st.subheader("Collection Components")
     
     collection_breakdown = pd.DataFrame({
-        'Period': ['Current Month (10%)', 'T-1 Month (75%)', 'T-2 Month (15%)'],
+        'Period': ['Current Month (11%)', 'T-1 Month (78%)', 'T-2 Month (11%)'],
         'Disbursement': [
             f"₹{loan_amt_current/100000:.2f}L",
             f"₹{loan_amt_t1/100000:.2f}L",
@@ -249,7 +249,7 @@ with col1:
             f"₹{collection_t1/100000:.2f}L",
             f"₹{collection_t2/100000:.2f}L"
         ],
-        'Percentage': ['10%', '75%', '15%']
+        'Percentage': ['11%', '78%', '11%']
     })
     
     st.dataframe(collection_breakdown, use_container_width=True, hide_index=True)
@@ -260,7 +260,7 @@ with col2:
     
     if PLOTLY_AVAILABLE:
         pie_data = pd.DataFrame({
-            'Period': ['Current (10%)', 'T-1 (75%)', 'T-2 (15%)'],
+            'Period': ['Current (11%)', 'T-1 (78%)', 'T-2 (11%)'],
             'Amount': [collection_current, collection_t1, collection_t2]
         })
         
@@ -277,7 +277,7 @@ with col2:
     else:
         st.warning("Install plotly for visualizations: pip install plotly")
         pie_data = pd.DataFrame({
-            'Period': ['Current (10%)', 'T-1 (75%)', 'T-2 (15%)'],
+            'Period': ['Current (11%)', 'T-1 (78%)', 'T-2 (11%)'],
             'Amount': [f"₹{collection_current/100000:.2f}L", f"₹{collection_t1/100000:.2f}L", f"₹{collection_t2/100000:.2f}L"]
         })
         st.dataframe(pie_data, use_container_width=True, hide_index=True)
@@ -336,9 +336,9 @@ summary_data = {
         'Loan Disbursed T-2 Month',
         'Interest Amount T-2',
         '',
-        'Collection from Current (10%)',
-        'Collection from T-1 (75%)',
-        'Collection from T-2 (15%)',
+        'Collection from Current (11%)',
+        'Collection from T-1 (78%)',
+        'Collection from T-2 (11%)',
         'Total Collection Required',
         '',
         'Sanction & Sales Staff (Exact)',
@@ -417,9 +417,9 @@ CALCULATED RESULTS:
 - Total Staff Required: {sum(team_rounded.values())}
 
 COLLECTION BREAKDOWN:
-- Current Month (10%): ₹{collection_current:,.0f}
-- T-1 Month (75%): ₹{collection_t1:,.0f}
-- T-2 Month (15%): ₹{collection_t2:,.0f}
+- Current Month (11%): ₹{collection_current:,.0f}
+- T-1 Month (78%): ₹{collection_t1:,.0f}
+- T-2 Month (11%): ₹{collection_t2:,.0f}
 - Total Collection: ₹{total_collection_required:,.0f}
 """
     
