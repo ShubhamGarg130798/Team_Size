@@ -57,6 +57,8 @@ if 'amt_bank_value' not in st.session_state:
     st.session_state.amt_bank_value = 17.64
 if 'pf_percentage' not in st.session_state:
     st.session_state.pf_percentage = 11.8
+if 'pf_just_changed' not in st.session_state:
+    st.session_state.pf_just_changed = False
 
 # Processing Fee input (needed for calculations)
 pf_percentage = st.sidebar.number_input(
@@ -65,15 +67,18 @@ pf_percentage = st.sidebar.number_input(
     max_value=100.0,
     value=st.session_state.pf_percentage,
     step=0.1,
+    key="pf_input",
     help="Processing fee as percentage of loan amount"
 )
 
-# If PF percentage changed, recalculate amount in bank
-if pf_percentage != st.session_state.pf_percentage:
+# If PF percentage changed, recalculate amount in bank and trigger rerun
+if abs(pf_percentage - st.session_state.pf_percentage) > 0.001:
     st.session_state.pf_percentage = pf_percentage
     loan_amt_current = st.session_state.loan_amt_value * 10000000
     amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
     st.session_state.amt_bank_value = amt_in_bank / 10000000
+    st.session_state.pf_just_changed = True
+    st.rerun()
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**💡 Control either input - the other updates automatically:**")
@@ -89,15 +94,6 @@ loan_amt_current_cr = st.sidebar.number_input(
     help="Gross loan amount to be disbursed (before PF deduction)"
 )
 
-# Check if loan amount changed
-if abs(loan_amt_current_cr - st.session_state.loan_amt_value) > 0.001:
-    st.session_state.loan_amt_value = loan_amt_current_cr
-    # Calculate amount in bank from loan amount
-    loan_amt_current = loan_amt_current_cr * 10000000
-    amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
-    st.session_state.amt_bank_value = amt_in_bank / 10000000
-    st.rerun()
-
 # Amount in Bank input
 amt_in_bank_cr = st.sidebar.number_input(
     "Amount in Bank (in Crores)",
@@ -109,13 +105,27 @@ amt_in_bank_cr = st.sidebar.number_input(
     help="Net amount available in bank after processing fee deduction"
 )
 
-# Check if amount in bank changed
-if abs(amt_in_bank_cr - st.session_state.amt_bank_value) > 0.001:
+# Reset the flag after displaying inputs
+if st.session_state.pf_just_changed:
+    st.session_state.pf_just_changed = False
+
+# Check if loan amount changed (and it wasn't just a PF change)
+if abs(loan_amt_current_cr - st.session_state.loan_amt_value) > 0.001 and not st.session_state.pf_just_changed:
+    st.session_state.loan_amt_value = loan_amt_current_cr
+    # Calculate amount in bank from loan amount
+    loan_amt_current = loan_amt_current_cr * 10000000
+    amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
+    st.session_state.amt_bank_value = amt_in_bank / 10000000
+    st.rerun()
+
+# Check if amount in bank changed (and it wasn't just a PF change)
+if abs(amt_in_bank_cr - st.session_state.amt_bank_value) > 0.001 and not st.session_state.pf_just_changed:
     st.session_state.amt_bank_value = amt_in_bank_cr
     # Calculate loan amount from amount in bank
     amt_in_bank = amt_in_bank_cr * 10000000
-    loan_amt_current = amt_in_bank / (1 - pf_percentage/100)
-    st.session_state.loan_amt_value = loan_amt_current / 10000000
+    if pf_percentage < 100:  # Avoid division by zero
+        loan_amt_current = amt_in_bank / (1 - pf_percentage/100)
+        st.session_state.loan_amt_value = loan_amt_current / 10000000
     st.rerun()
 
 # Use the current values for calculations
