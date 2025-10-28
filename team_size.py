@@ -51,22 +51,29 @@ if work_type == "PHP":
 st.sidebar.subheader("💰 Loan Disbursement Details")
 
 # Initialize session state for synchronized inputs
-if 'last_changed' not in st.session_state:
-    st.session_state.last_changed = 'loan_amt'
 if 'loan_amt_value' not in st.session_state:
     st.session_state.loan_amt_value = 20.0
 if 'amt_bank_value' not in st.session_state:
     st.session_state.amt_bank_value = 17.64
+if 'pf_percentage' not in st.session_state:
+    st.session_state.pf_percentage = 11.8
 
 # Processing Fee input (needed for calculations)
 pf_percentage = st.sidebar.number_input(
     "Processing Fee (PF) %",
     min_value=0.0,
     max_value=100.0,
-    value=11.8,
+    value=st.session_state.pf_percentage,
     step=0.1,
     help="Processing fee as percentage of loan amount"
 )
+
+# If PF percentage changed, recalculate amount in bank
+if pf_percentage != st.session_state.pf_percentage:
+    st.session_state.pf_percentage = pf_percentage
+    loan_amt_current = st.session_state.loan_amt_value * 10000000
+    amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
+    st.session_state.amt_bank_value = amt_in_bank / 10000000
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**💡 Control either input - the other updates automatically:**")
@@ -82,6 +89,15 @@ loan_amt_current_cr = st.sidebar.number_input(
     help="Gross loan amount to be disbursed (before PF deduction)"
 )
 
+# Check if loan amount changed
+if abs(loan_amt_current_cr - st.session_state.loan_amt_value) > 0.001:
+    st.session_state.loan_amt_value = loan_amt_current_cr
+    # Calculate amount in bank from loan amount
+    loan_amt_current = loan_amt_current_cr * 10000000
+    amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
+    st.session_state.amt_bank_value = amt_in_bank / 10000000
+    st.rerun()
+
 # Amount in Bank input
 amt_in_bank_cr = st.sidebar.number_input(
     "Amount in Bank (in Crores)",
@@ -93,21 +109,14 @@ amt_in_bank_cr = st.sidebar.number_input(
     help="Net amount available in bank after processing fee deduction"
 )
 
-# Detect which input changed and update the other
-if loan_amt_current_cr != st.session_state.loan_amt_value:
-    st.session_state.last_changed = 'loan_amt'
-    st.session_state.loan_amt_value = loan_amt_current_cr
-    # Calculate amount in bank from loan amount
-    loan_amt_current = loan_amt_current_cr * 10000000
-    amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
-    st.session_state.amt_bank_value = amt_in_bank / 10000000
-elif amt_in_bank_cr != st.session_state.amt_bank_value:
-    st.session_state.last_changed = 'amt_bank'
+# Check if amount in bank changed
+if abs(amt_in_bank_cr - st.session_state.amt_bank_value) > 0.001:
     st.session_state.amt_bank_value = amt_in_bank_cr
     # Calculate loan amount from amount in bank
     amt_in_bank = amt_in_bank_cr * 10000000
     loan_amt_current = amt_in_bank / (1 - pf_percentage/100)
     st.session_state.loan_amt_value = loan_amt_current / 10000000
+    st.rerun()
 
 # Use the current values for calculations
 loan_amt_current = st.session_state.loan_amt_value * 10000000
