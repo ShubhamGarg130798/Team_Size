@@ -49,15 +49,17 @@ if work_type == "PHP":
 
 # Financial Parameters
 st.sidebar.subheader("💰 Loan Disbursement Details")
-loan_amt_current_cr = st.sidebar.number_input(
-    "Loan Amount to be Disbursed (Current Month) (in Crores)",
+
+# Amount in Bank as input parameter
+amt_in_bank_cr = st.sidebar.number_input(
+    "Amount in Bank (in Crores)",
     min_value=0.0,
-    value=20.0,
+    value=17.64,
     step=0.1,
     format="%.2f",
-    help="Enter amount in Crores (e.g., 1.0 for 1 CR)"
+    help="Net amount available in bank after processing fee deduction"
 )
-loan_amt_current = loan_amt_current_cr * 10000000
+amt_in_bank = amt_in_bank_cr * 10000000
 
 pf_percentage = st.sidebar.number_input(
     "Processing Fee (PF) %",
@@ -67,6 +69,13 @@ pf_percentage = st.sidebar.number_input(
     step=0.1,
     help="Processing fee as percentage of loan amount"
 )
+
+# Calculate loan amount from amount in bank
+# Formula: amt_in_bank = loan_amt_current - (pf_percentage/100 * loan_amt_current)
+# amt_in_bank = loan_amt_current * (1 - pf_percentage/100)
+# loan_amt_current = amt_in_bank / (1 - pf_percentage/100)
+loan_amt_current = amt_in_bank / (1 - pf_percentage/100)
+pf_amount = loan_amt_current - amt_in_bank
 
 roi_per_day = st.sidebar.number_input(
     "ROI per Day (%)",
@@ -126,14 +135,10 @@ loan_amt_t2 = loan_amt_t2_cr * 10000000
 
 # Team Performance Parameters
 st.sidebar.subheader("👥 Team Performance Targets")
-
-# Set default sales target based on work type
-default_sales_target = 150000.0 if work_type == "PHP" else 250000.0
-
 sanction_sales_target = st.sidebar.number_input(
     "Sales Target Per Day Per Person",
     min_value=0.0,
-    value=default_sales_target,
+    value=250000.0,
     step=10000.0,
     format="%.0f",
     help="Daily target per sales person"
@@ -176,10 +181,6 @@ else:
 # Calculations
 st.header("📋 Key Calculations")
 
-# 1. Amount to be present in bank
-pf_amount = (pf_percentage / 100) * loan_amt_current
-amt_in_bank = loan_amt_current - pf_amount
-
 # 2. Repayment Amount
 repayment_amt = loan_amt_current + (loan_amt_current * (roi_per_day / 100) * avg_tenure)
 
@@ -218,10 +219,11 @@ col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     st.metric(
-        label="💵 Amount in Bank",
-        value=f"₹{amt_in_bank/100000:.2f}L",
-        delta=f"-₹{pf_amount/100000:.2f}L (PF)",
-        help=f"Net amount after deducting {pf_percentage}% processing fee"
+        label="💰 Loan Amount to be Disbursed",
+        value=f"₹{loan_amt_current/10000000:.2f} Cr",
+        delta=f"PF: ₹{pf_amount/100000:.2f}L ({pf_percentage}%)",
+        delta_color="inverse",
+        help=f"Gross loan amount to be disbursed (before PF deduction)"
     )
 
 with col2:
@@ -328,9 +330,9 @@ team_rounded = {
 summary_data = {
     'Parameter': [
         'Work Type',
-        'Loan Amount to Disburse (Current)',
+        'Amount in Bank',
         'Processing Fee Amount',
-        'Amount Required in Bank',
+        'Loan Amount to Disburse (Current)',
         'Number of Loans',
         'Average Ticket Size',
         'Interest Amount (Current)',
@@ -357,9 +359,9 @@ summary_data = {
     ],
     'Value': [
         work_type,
-        f"₹{loan_amt_current:,.0f}",
-        f"₹{pf_amount:,.0f}",
         f"₹{amt_in_bank:,.0f}",
+        f"₹{pf_amount:,.0f}",
+        f"₹{loan_amt_current:,.0f}",
         f"{int(no_of_loans)}",
         f"₹{avg_ticket_size:,.0f}",
         f"₹{interest_current:,.0f}",
@@ -414,8 +416,9 @@ Generated on: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}
 WORK TYPE: {work_type}
 
 INPUT PARAMETERS:
-- Loan Amount (Current): ₹{loan_amt_current:,.0f}
+- Amount in Bank: ₹{amt_in_bank:,.0f}
 - Processing Fee: {pf_percentage}%
+- Loan Amount (Current): ₹{loan_amt_current:,.0f}
 - ROI per Day: {roi_per_day}%
 - Average Ticket Size: ₹{avg_ticket_size:,.0f}
 - Average Tenure: {avg_tenure} days
@@ -425,10 +428,11 @@ INPUT PARAMETERS:
 - Credit Efficiency/Day: {credit_efficiency:.0f} {'(Not applicable - PHP)' if work_type == 'PHP' else ''}
 
 CALCULATED RESULTS:
-- Amount in Bank: ₹{amt_in_bank:,.0f}
+- Loan Amount to Disburse: ₹{loan_amt_current:,.0f}
+- Processing Fee Amount: ₹{pf_amount:,.0f}
 - Repayment Amount: ₹{repayment_amt:,.0f}
 - Number of Loans: {int(no_of_loans)}
-- Loans to be Checked: {f'{loans_to_be_checked:.2f}' if work_type == 'NON-PHP' else 'N/A (PHP)'}
+- Loans to be Checked: {loans_to_be_checked:.2f if work_type == 'NON-PHP' else 'N/A (PHP)'}
 - Sales Staff: {team_rounded['Sales']}
 - Credit Staff: {team_rounded['Credit']} {'(PHP - No Credit Team)' if work_type == 'PHP' else ''}
 - Collection Staff: {team_rounded['Collection']}
