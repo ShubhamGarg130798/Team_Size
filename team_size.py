@@ -156,9 +156,9 @@ interest_t1 = loan_amt_t1 * (roi_per_day / 100) * avg_tenure
 interest_t2 = loan_amt_t2 * (roi_per_day / 100) * avg_tenure
 
 # Collection components (Principal + Interest)
-collection_current = (loan_amt_current + interest_current) * 0.11
-collection_t1 = (loan_amt_t1 + interest_t1) * 0.78
-collection_t2 = (loan_amt_t2 + interest_t2) * 0.11
+collection_current = (loan_amt_current + interest_current) * 0.10
+collection_t1 = (loan_amt_t1 + interest_t1) * 0.75
+collection_t2 = (loan_amt_t2 + interest_t2) * 0.10
 
 # Total collection required
 total_collection_required = collection_current + collection_t1 + collection_t2
@@ -233,7 +233,7 @@ with col1:
     st.subheader("Collection Components")
     
     collection_breakdown = pd.DataFrame({
-        'Period': ['Current Month (11%)', 'T-1 Month (78%)', 'T-2 Month (11%)'],
+        'Period': ['Current Month (10%)', 'T-1 Month (75%)', 'T-2 Month (15%)'],
         'Disbursement': [
             f"₹{loan_amt_current/100000:.2f}L",
             f"₹{loan_amt_t1/100000:.2f}L",
