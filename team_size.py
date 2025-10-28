@@ -137,7 +137,7 @@ conversion_rate = st.sidebar.number_input(
     "Conversion Rate by Credit Team (%)",
     min_value=0.0,
     max_value=100.0,
-    value=80.0,
+    value=30.0,
     step=1.0,
     help="Percentage of loans that get approved by credit team"
 )
@@ -145,7 +145,7 @@ conversion_rate = st.sidebar.number_input(
 credit_efficiency = st.sidebar.number_input(
     "Efficiency of Credit Person Per Day",
     min_value=0.0,
-    value=10.0,
+    value=80.0,
     step=1.0,
     format="%.0f",
     help="Number of loans a credit person can check per day"
