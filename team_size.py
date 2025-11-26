@@ -427,7 +427,7 @@ CALCULATED RESULTS:
 - Amount in Bank: ₹{amt_in_bank:,.0f}
 - Repayment Amount: ₹{repayment_amt:,.0f}
 - Number of Loans: {int(no_of_loans)}
-- Loans to be Checked: {loans_to_be_checked:.2f if work_type == 'NON-PHP' else 'N/A (PHP)'}
+- Loans to be Checked: {f"{loans_to_be_checked:.2f}" if work_type == 'NON-PHP' else 'N/A (PHP)'}
 - Sales Staff: {team_rounded['Sales']}
 - Credit Staff: {team_rounded['Credit']} {'(PHP - No Credit Team)' if work_type == 'PHP' else ''}
 - Collection Staff: {team_rounded['Collection']}
